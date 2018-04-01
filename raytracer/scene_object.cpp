@@ -45,22 +45,13 @@ bool UnitSquare::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
         {
             //If so, then get normal and intersection point
             ray.intersection.t_value = t;
-            Point3D inter;
-            Vector3D normal;
-            inter[0] = x_check;
-            inter[1] = y_check;
-            inter[2] = 0;
-            normal[0] = 0;
-            normal[1] = 0;
-            normal[2] = 1;
+            Point3D inter=Point3D(x_check,y_check,0.0);
+            Vector3D normal=Vector3D(0.0,0.0,1.0);
             //Transform back to world coordinates
             ray.intersection.point = modelToWorld * inter;
             ray.intersection.normal = worldToModel.transpose()*normal;
-            
             //Normalize normal
-            ray.intersection.normal[0] = ray.intersection.normal[0]/sqrt(pow(ray.intersection.normal[0],2) + pow(ray.intersection.normal[1],2) + pow(ray.intersection.normal[2],2));
-            ray.intersection.normal[1] = ray.intersection.normal[1]/sqrt(pow(ray.intersection.normal[0],2) + pow(ray.intersection.normal[1],2) + pow(ray.intersection.normal[2],2));
-            ray.intersection.normal[2] = ray.intersection.normal[2]/sqrt(pow(ray.intersection.normal[0],2) + pow(ray.intersection.normal[1],2) + pow(ray.intersection.normal[2],2));
+            ray.intersection.normal.normalize();
             ray.intersection.none = false;
             return true;
         }
@@ -84,16 +75,12 @@ bool UnitSphere::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
     Ray3D r_h;
     r_h.origin = worldToModel*ray.origin;
     r_h.dir = worldToModel*ray.dir;
-    Color r;
-    r[0] = 1;
-    r[1] = 0;
-    r[2] = 0;
+    Color r=Color(1.0,0.0,0.0);
     
     //Computing step variables to help us compute intersection
-    double A = r_h.dir[0]*r_h.dir[0] + r_h.dir[1]*r_h.dir[1] + r_h.dir[2]*r_h.dir[2];
+    double A = r_h.dir.dot(r_h.dir);
     double B = r_h.origin[0]*r_h.dir[0] + r_h.origin[1]*r_h.dir[1] + r_h.origin[2]*r_h.dir[2];
     double C = r_h.origin[0]*r_h.origin[0] + r_h.origin[1]*r_h.origin[1] + r_h.origin[2]*r_h.origin[2] - 1;
-    //double t = -(r_h.origin[2])/(r_h.dir[2]);
     double D = pow(B,2) - A*C;
     
     double t = -(B/A) - (sqrt(D)/A);
@@ -112,23 +99,16 @@ bool UnitSphere::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
             
             //Set point of intersection and normal
             ray.intersection.t_value = t;
-            Point3D inter;
-            Vector3D normal;
-            inter[0] = x_check;
-            inter[1] = y_check;
-            inter[2] = z_check;
-            normal[0] = x_check;//sqrt((pow(x_check,2) + pow(y_check,2)  + pow(z_check,2)));
-            normal[1] = y_check;//sqrt((pow(x_check,2) + pow(y_check,2)  + pow(z_check,2)));
-            normal[2] = z_check;//sqrt((pow(x_check,2) + pow(y_check,2)  + pow(z_check,2)));
+            Point3D inter=Point3D(x_check,y_check,z_check);
+            Vector3D normal=Vector3D(x_check,y_check,z_check);
+            
             
             //Transform back to world coordinates
             ray.intersection.point = modelToWorld * inter;
             ray.intersection.normal = worldToModel.transpose()*normal;
             
             //Normalize normal
-            ray.intersection.normal[0] = ray.intersection.normal[0]/sqrt(pow(ray.intersection.normal[0],2) + pow(ray.intersection.normal[1],2) + pow(ray.intersection.normal[2],2));
-            ray.intersection.normal[1] = ray.intersection.normal[1]/sqrt(pow(ray.intersection.normal[0],2) + pow(ray.intersection.normal[1],2) + pow(ray.intersection.normal[2],2));
-            ray.intersection.normal[2] = ray.intersection.normal[2]/sqrt(pow(ray.intersection.normal[0],2) + pow(ray.intersection.normal[1],2) + pow(ray.intersection.normal[2],2));
+            ray.intersection.normal.normalize();
             ray.intersection.none = false;
             return true;
         }

@@ -81,10 +81,7 @@ void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Imag
 			imagePlane[0] = (-double(image.width)/2 + 0.5 + j)/factor;
 			imagePlane[1] = (-double(image.height)/2 + 0.5 + i)/factor;
 			imagePlane[2] = -1;
-            Vector3D direction;
-            direction[0] = imagePlane[0];
-            direction[1] = imagePlane[1];
-            direction[2] = imagePlane[2];
+            Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
     
             Ray3D ray;
             // TODO: Convert ray to world space
