@@ -39,10 +39,7 @@ void PointLight::shade(Ray3D& ray) {
     R.normalize();
     double BR = B.dot(R);
     //phong
-    Color KsIs=Ks*Is;
-    Color KdId=Kd*Id;
-    Color KaIa=Ka*Ia;
-    ray.col = KaIa + fmax(0.0,LN)*KdId + fmax(0.0,pow(BR,alpha))*KsIs;
+    ray.col = Ka*Ia + fmax(0.0,LN)*Kd*Id + fmax(0.0,pow(BR,alpha))*Ks*Is;
     ray.col.clamp();
 
 }
