@@ -55,7 +55,6 @@ Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list) {
 		computeShading(ray, light_list); 
 		col = ray.col;  
 	}
-
 	// You'll want to call shadeRay recursively (with a different ray, 
 	// of course) here to implement reflection/refraction effects.  
 

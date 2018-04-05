@@ -52,8 +52,9 @@ Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list) {
 	// Don't bother shading if the ray didn't hit 
 	// anything.
 	if (!ray.intersection.none) {
-		computeShading(ray, light_list); 
-		col = ray.col;  
+		computeShading(ray, light_list);
+//        ray.col=ray.intersection.mat->diffuse;
+		col = ray.col;
 	}
 
 	// You'll want to call shadeRay recursively (with a different ray, 
