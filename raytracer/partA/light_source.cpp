@@ -42,7 +42,8 @@ void PointLight::shade(Ray3D& ray) {
     Color KsIs=Ks*Is;
     Color KdId=Kd*Id;
     Color KaIa=Ka*Ia;
-    ray.col = KaIa + std::max(0.0,LN)*KdId + std::max(0.0,pow(BR,alpha))*KsIs;
+    //Remove diffuse here to ge diffuse.bmp
+    ray.col = KaIa + fmax(0.0,LN)*KdId + fmax(0.0,pow(BR,alpha))*KsIs;
     ray.col.clamp();
 
 }
