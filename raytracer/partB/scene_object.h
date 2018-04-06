@@ -65,6 +65,12 @@ typedef std::vector<SceneNode*> Scene;
 
 // Example primitive you can create, this is a unit square on 
 // the xy-plane.
+class UnitCube : public SceneObject {
+public:
+    bool intersect(Ray3D& ray, const Matrix4x4& worldToModel,
+                   const Matrix4x4& modelToWorld);
+};
+
 class UnitSquare : public SceneObject {
 public:
 	bool intersect(Ray3D& ray, const Matrix4x4& worldToModel, 

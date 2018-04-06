@@ -9,19 +9,19 @@
 #include <cmath>
 #include "scene_object.h"
 
-bool UnitSquare::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
-		const Matrix4x4& modelToWorld) {
-	// TODO: implement intersection code for UnitSquare, which is
-	// defined on the xy-plane, with vertices (0.5, 0.5, 0), 
-	// (-0.5, 0.5, 0), (-0.5, -0.5, 0), (0.5, -0.5, 0), and normal
-	// (0, 0, 1).
-	//
-	// Your goal here is to fill ray.intersection with correct values
-	// should an intersection occur.  This includes intersection.point, 
-	// intersection.normal, intersection.none, intersection.t_value.   
-	//
-	// HINT: Remember to first transform the ray into object space  
-	// to simplify the intersection test.
+bool UnitCube::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
+                           const Matrix4x4& modelToWorld) {
+    // TODO: implement intersection code for UnitSquare, which is
+    // defined on the xy-plane, with vertices (0.5, 0.5, 0),
+    // (-0.5, 0.5, 0), (-0.5, -0.5, 0), (0.5, -0.5, 0), and normal
+    // (0, 0, 1).
+    //
+    // Your goal here is to fill ray.intersection with correct values
+    // should an intersection occur.  This includes intersection.point,
+    // intersection.normal, intersection.none, intersection.t_value.
+    //
+    // HINT: Remember to first transform the ray into object space
+    // to simplify the intersection test.
     Point3D transform_origin = worldToModel*ray.origin;
     Vector3D transform_dir = worldToModel*ray.dir;
     double t = -(transform_origin[2])/(transform_dir[2]); //Computing intersection location
@@ -49,7 +49,50 @@ bool UnitSquare::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
             return true;
         }
     }
-	return false;
+    return false;
+}
+
+bool UnitSquare::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
+                           const Matrix4x4& modelToWorld) {
+    // TODO: implement intersection code for UnitSquare, which is
+    // defined on the xy-plane, with vertices (0.5, 0.5, 0),
+    // (-0.5, 0.5, 0), (-0.5, -0.5, 0), (0.5, -0.5, 0), and normal
+    // (0, 0, 1).
+    //
+    // Your goal here is to fill ray.intersection with correct values
+    // should an intersection occur.  This includes intersection.point,
+    // intersection.normal, intersection.none, intersection.t_value.
+    //
+    // HINT: Remember to first transform the ray into object space
+    // to simplify the intersection test.
+    Point3D transform_origin = worldToModel*ray.origin;
+    Vector3D transform_dir = worldToModel*ray.dir;
+    double t = -(transform_origin[2])/(transform_dir[2]); //Computing intersection location
+    if (t < 0)
+    {
+        return false;
+    }
+    //Getting the point of intersection
+    double x = transform_origin[0] + t*transform_dir[0];
+    double y = transform_origin[1] + t*transform_dir[1];
+    if (x >= -0.5 && x <= 0.5 && y >= -0.5 && y <= 0.5) //Checking if intersection point is in cube
+    {
+        if (ray.intersection.none || t < ray.intersection.t_value)
+        {
+            //If so, then get normal and intersection point
+            ray.intersection.t_value = t;
+            Point3D inter=Point3D(x,y,0.0);
+            Vector3D normal=Vector3D(0.0,0.0,1.0);
+            //Transform back to world coordinates
+            ray.intersection.point = modelToWorld * inter;
+            ray.intersection.normal = worldToModel.transpose()*normal;
+            //Normalize normal
+            ray.intersection.normal.normalize();
+            ray.intersection.none = false;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool UnitSphere::intersect(Ray3D& ray, const Matrix4x4& worldToModel,

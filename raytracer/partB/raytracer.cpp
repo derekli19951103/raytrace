@@ -36,6 +36,7 @@ void Raytracer::computeTransforms(Scene& scene) {
 }
 
 void Raytracer::computeShading(Ray3D& ray, LightList& light_list, Scene& scene) {
+    Color c(0.0,0.0,0.0);
 	for (size_t  i = 0; i < light_list.size(); ++i) {
 		LightSource* light = light_list[i];
 		
@@ -53,8 +54,9 @@ void Raytracer::computeShading(Ray3D& ray, LightList& light_list, Scene& scene) 
         if(!shadow.intersection.none){
             ray.col = 0.3 * ray.col;
         }
-        
+        c = c + ray.col;
 	}
+    ray.col = (1.0/light_list.size()) * c;
 }
 
 Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
