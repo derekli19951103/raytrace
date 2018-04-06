@@ -138,8 +138,8 @@ struct Material {
 	// Specular expoent.
 	double specular_exp;
     
-    bool refractive;
-    double index_of_refraction;
+//    bool refractive;
+//    double index_of_refraction;
 };
 
 struct Intersection {
