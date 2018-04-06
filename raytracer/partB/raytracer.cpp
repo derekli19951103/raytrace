@@ -35,13 +35,25 @@ void Raytracer::computeTransforms(Scene& scene) {
 	}
 }
 
-void Raytracer::computeShading(Ray3D& ray, LightList& light_list) {
+void Raytracer::computeShading(Ray3D& ray, LightList& light_list, Scene& scene) {
 	for (size_t  i = 0; i < light_list.size(); ++i) {
 		LightSource* light = light_list[i];
 		
 		// Each lightSource provides its own shading function.
 		// Implement shadows here if needed.
-		light->shade(ray);        
+		light->shade(ray);
+        
+        Point3D origin = ray.intersection.point;
+        Vector3D dir = light->get_position() - origin;
+        dir.normalize();
+        
+        Ray3D shadow(origin + 0.001 * dir ,dir);
+        traverseScene(scene,shadow);
+        
+        if(!shadow.intersection.none){
+            ray.col = 0.3 * ray.col;
+        }
+        
 	}
 }
 
@@ -52,7 +64,7 @@ Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, int r
 	// Don't bother shading if the ray didn't hit 
 	// anything.
 	if (!ray.intersection.none) {
-		computeShading(ray, light_list); 
+		computeShading(ray, light_list, scene);
 		col = ray.col;  
 	
 	// You'll want to call shadeRay recursively (with a different ray, 
