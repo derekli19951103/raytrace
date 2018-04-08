@@ -123,35 +123,48 @@ void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Imag
 	// Construct a ray for each pixel.
 	for (int i = 0; i < image.height; i++) {
 		for (int j = 0; j < image.width; j++) {
-			// Sets up ray origin and direction in view space, 
-			// image plane is at z = -1.
-			Point3D origin(0, 0, 0);
-			Point3D imagePlane;
+//            // Sets up ray origin and direction in view space,
+//            // image plane is at z = -1.
+//            Point3D origin(0, 0, 0);
+//            Point3D imagePlane;
+//
+//            // 16X Supersampling for ANTI-aliasing
+//            Color avg_out(0.0, 0.0, 0.0);
+//            for (float i_patch = i; i_patch < i + 1; i_patch += 0.25f) {
+//                for (float j_patch = j; j_patch < j + 1; j_patch += 0.25f) {
+//                    // 4 rays per pixel, by adding 0.5f to the planar directions
+//                    imagePlane[0] = (-double(image.width)/2 + 0.5 + j_patch)/factor;
+//                    imagePlane[1] = (-double(image.height)/2 + 0.5 + i_patch)/factor;
+//                    imagePlane[2] = -1;
+//
+//                    Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
+//
+//                    Ray3D ray;
+//
+//                    ray.origin = viewToWorld*origin;
+//                    ray.dir = viewToWorld*direction;
+//                    Color col=shadeRay(ray,scene,light_list);
+//                    col = (1.0/16.0) * col;
+//                    avg_out = avg_out + col;
+//                    avg_out.clamp();
+//                }
+//            }
+//
+//
+//            image.setColorAtPixel(i, j, avg_out);
+            Point3D origin(0, 0, 0);
+            Point3D imagePlane;
+            imagePlane[0] = (-double(image.width)/2 + 0.5 + j)/factor;
+            imagePlane[1] = (-double(image.height)/2 + 0.5 + i)/factor;
+            imagePlane[2] = -1;
+            Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
             
-            // 16X Supersampling for ANTI-aliasing
-            Color avg_out(0.0, 0.0, 0.0);
-            for (float i_patch = i; i_patch < i + 1; i_patch += 0.25f) {
-                for (float j_patch = j; j_patch < j + 1; j_patch += 0.25f) {
-                    // 4 rays per pixel, by adding 0.5f to the planar directions
-                    imagePlane[0] = (-double(image.width)/2 + 0.5 + j_patch)/factor;
-                    imagePlane[1] = (-double(image.height)/2 + 0.5 + i_patch)/factor;
-                    imagePlane[2] = -1;
-                    
-                    Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
-                    
-                    Ray3D ray;
-
-                    ray.origin = viewToWorld*origin;
-                    ray.dir = viewToWorld*direction;
-                    Color col=shadeRay(ray,scene,light_list);
-                    col = (1.0/16.0) * col;
-                    avg_out = avg_out + col;
-                    avg_out.clamp();
-                }
-            }
-            
-
-			image.setColorAtPixel(i, j, avg_out);
+            Ray3D ray;
+            // TODO: Convert ray to world space
+            ray.origin = viewToWorld*origin;
+            ray.dir = viewToWorld*direction;
+            Color col=shadeRay(ray,scene,light_list);
+            image.setColorAtPixel(i, j, col);
 		}
 	}
 }

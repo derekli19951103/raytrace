@@ -71,8 +71,7 @@ int main(int argc, char* argv[])
 	plane->scale(Point3D(0, 0, 0), factor2);
     
     double factor3[3] = { 1.0, 1.0, 1.0 };
-    cube->translate(Vector3D(0, 0, -7));
-    cube->rotate('z', 45);
+    cube->translate(Vector3D(0, 3, -5));
     cube->scale(Point3D(0, 0, 0), factor3);
 
 	// Render the scene, feel free to make the image smaller for
