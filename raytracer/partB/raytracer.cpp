@@ -298,6 +298,11 @@ void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Imag
     CubeEnv cube;
     cube.load_cube();
     
+    float f_length = 8.0;
+    float f_size = 0.05;
+    int num_of_ray = 16;
+    float r;
+    
 	// Construct a ray for each pixel.
 	for (int i = 0; i < image.height; i++) {
 		for (int j = 0; j < image.width; j++) {
@@ -305,30 +310,45 @@ void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Imag
             // image plane is at z = -1.
             Point3D origin(0, 0, 0);
             Point3D imagePlane;
-
-            // 16X Supersampling for ANTI-aliasing
+            
+            // Depth of Field
+            imagePlane[0] = (-double(image.width)/2 + 0.5 + j)/factor;
+            imagePlane[1] = (-double(image.height)/2 + 0.5 + i)/factor;
+            imagePlane[2] = -1;
+            Vector3D direction = Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
+            Ray3D ray;
+            ray.origin = viewToWorld*origin;
+            ray.dir = viewToWorld*direction;
+            ray.dir.normalize();
+            
+            float apertureRx = camera.up.normalize() * f_size;
+            float apertureRy = camera.view.normalize() * f_size;
+            
+            // Cast multiple ray and get the avg
             Color avg_out(0.0, 0.0, 0.0);
-            for (float i_patch = i; i_patch < i + 1; i_patch += 0.25f) {
-                for (float j_patch = j; j_patch < j + 1; j_patch += 0.25f) {
-                    // 4 rays per pixel, by adding 0.5f to the planar directions
-                    imagePlane[0] = (-double(image.width)/2 + 0.5 + j_patch)/factor;
-                    imagePlane[1] = (-double(image.height)/2 + 0.5 + i_patch)/factor;
-                    imagePlane[2] = -1;
-
-                    Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
-
-                    Ray3D ray;
-
-                    ray.origin = viewToWorld*origin;
-                    ray.dir = viewToWorld*direction;
-                    Color col=shadeRay(ray,scene,light_list,cube);
-                    col = (1.0/16.0) * col;
-                    avg_out = avg_out + col;
-                    avg_out.clamp();
-                }
+            for(int ind = 0; ind < num_of_ray; ind++){
+                // Get random eye position
+                Point3D the_eye = camera.eye;
+                the_eye[0] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRx;
+                the_eye[1] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRy;
+                
+                // Use position to create new camera
+                Camera the_cam(the_eye, camera.view, camera.up, camera.fov);
+                
+                // The focal point
+                Point3D focus_point = camera.eye + f_length * ray.dir;
+                Vector3D the_dir = focus_point - the_cam.eye;
+                
+                Matrix4x4 the_viewOfWorld = the_cam.initInvViewMatrix();
+                
+                Point3D the_origin = the_viewOfWorld * imagePlane;
+                the_dir.normalize();
+                Ray3D the_ray(the_origin, the_dir);
+                
+                Color col = shadeRay(the_ray, scene, light_list,cube);
+                col = (1.0/num_of_ray) * col;
+                avg_out = avg_out + col;
             }
-
-
             image.setColorAtPixel(i, j, avg_out);
             
 		}
@@ -539,6 +559,68 @@ void Raytracer::render_reflection(Camera& camera, Scene& scene, LightList& light
             Color col=shadeRay_reflection(ray,scene,light_list);
             image.setColorAtPixel(i, j, col);
             
+        }
+    }
+}
+
+void Raytracer::render_dof(Camera& camera, Scene& scene, LightList& light_list, Image& image) {
+    computeTransforms(scene);
+    
+    Matrix4x4 viewToWorld;
+    double factor = (double(image.height)/2)/tan(camera.fov*M_PI/360.0);
+    
+    viewToWorld = camera.initInvViewMatrix();
+    float f_length = 8.0;
+    float f_size = 0.05;
+    int num_of_ray = 2;
+    float r;
+    // Construct a ray for each pixel.
+    for (int i = 0; i < image.height; i++) {
+        for (int j = 0; j < image.width; j++) {
+            Point3D origin(0, 0, 0);
+            Point3D imagePlane;
+            
+            // Depth of Field
+            imagePlane[0] = (-double(image.width)/2 + 0.5 + j)/factor;
+            imagePlane[1] = (-double(image.height)/2 + 0.5 + i)/factor;
+            imagePlane[2] = -1;
+            Vector3D direction = Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
+            Ray3D ray;
+            ray.origin = viewToWorld*origin;
+            ray.dir = viewToWorld*direction;
+            ray.dir.normalize();
+            
+            float apertureRx = camera.up.normalize() * f_size;
+            float apertureRy = camera.view.normalize() * f_size;
+            
+            // Cast multiple ray and get the avg
+            Color avg_out(0.0, 0.0, 0.0);
+            for(int ind = 0; ind < num_of_ray; ind++){
+                // Get random eye position
+                Point3D the_eye = camera.eye;
+                the_eye[0] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRx;
+                the_eye[1] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRy;
+                
+                // Use position to create new camera
+                Camera the_cam(the_eye, camera.view, camera.up, camera.fov);
+                
+                // The focal point
+                Point3D focus_point = camera.eye + f_length * ray.dir;
+                Vector3D the_dir = focus_point - the_cam.eye;
+                
+                Matrix4x4 the_viewOfWorld = the_cam.initInvViewMatrix();
+                
+                Point3D the_origin = the_viewOfWorld * imagePlane;
+                the_dir.normalize();
+                Ray3D the_ray(the_origin, the_dir);
+                
+                Color col = shadeRay_anti(the_ray, scene, light_list);
+                col = (1.0/num_of_ray) * col;
+                avg_out = avg_out + col;
+            }
+            
+            
+            image.setColorAtPixel(i, j, avg_out);
         }
     }
 }

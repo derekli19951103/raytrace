@@ -23,17 +23,15 @@ struct Texture {
     
     // array of dimension (x,y) giving the heightmap value at that pixel
     void load(const char * filename);
+    //to access certain point color
     Color col(Point3D uv);
 };
 
 struct CubeEnv {
-    Point3D coord_trans(Vector3D direction, int* face);
-    
-    // For the environment maps that use bmp files
-    // We define an image for every face of the cube;
     void load_cube();
     Color get_color(Vector3D direction);
     
+    //six positions
     Texture * posx;
     Texture * negx;
     Texture * posy;
@@ -44,7 +42,7 @@ struct CubeEnv {
 
 class Raytracer {
 public:
-	// Renders 3D scene to an image given camera and lights setup.
+	// Different renders for rendering 3D scene to an image given camera and lights setup.
 	void render(Camera& camera, Scene& scene, LightList& light_list, Image& image);
     void render_anti(Camera& camera, Scene& scene, LightList& light_list, Image& image);
     void render_cube(Camera& camera, Scene& scene, LightList& light_list, Image& image);
@@ -52,20 +50,25 @@ public:
     void render_reflection(Camera& camera, Scene& scene, LightList& light_list, Image& image);
     void render_hardshadow(Camera& camera, Scene& scene, LightList& light_list, Image& image);
     void render_glossy(Camera& camera, Scene& scene, LightList& light_list, Image& image);
+    void render_dof(Camera& camera, Scene& scene, LightList& light_list, Image& image);
 private:
 
-	// Return the color of the ray after intersection and shading, call 
-	// this function recursively for reflection and refraction.  
+	// this shader is for full FX.
 	Color shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times);
     
+    //this shader has cube environment
     Color shadeRay_cube(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times);
     
+    //this shader has no hardshadow
     Color shadeRay_reflection(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
     
+    //this shader is for softshadow
     Color shadeRay_softshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
     
+    //this shader has no reflection
     Color shadeRay_hardshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
     
+    //this shader has reflection and hardshadow
     Color shadeRay_anti(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
 
 
@@ -77,11 +80,13 @@ private:
     // object in the scene.
     void computeTransforms(Scene& scene);
 
-	
+	//this computes hardshadow
 	void computeShading_hardshadow(Ray3D& ray, LightList& light_list, Scene& scene);
     
+    //this computes softshadow
     void computeShading_softshadow(Ray3D& ray, LightList& light_list, Scene& scene);
     
+    //this ignores shadow
     void computeShading_noshadow(Ray3D& ray, LightList& light_list, Scene& scene);
     
 
@@ -94,3 +99,4 @@ int hardshadow(int width, int height);
 int full(int width, int height);
 int environment(int width, int height);
 int glossy(int width, int height);
+int dof(int width, int height);
