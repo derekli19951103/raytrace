@@ -137,9 +137,7 @@ struct Material {
 	Color specular;
 	// Specular expoent.
 	double specular_exp;
-    
-//    bool refractive;
-//    double index_of_refraction;
+
 };
 
 struct Intersection {

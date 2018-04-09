@@ -59,10 +59,9 @@ void Raytracer::computeShading(Ray3D& ray, LightList& light_list, Scene& scene) 
     ray.col = (1.0/light_list.size()) * c;
 }
 
-Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
+Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times = 0) {
 	Color col(0.0, 0.0, 0.0); 
-	traverseScene(scene, ray); 
-
+	traverseScene(scene, ray);
 	// Don't bother shading if the ray didn't hit 
 	// anything.
 	if (!ray.intersection.none) {
@@ -78,35 +77,21 @@ Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, int r
             Vector3D N = ray.intersection.normal;
             Vector3D I = ray.dir;
             
-            //if refractive then calculate the refraction.
-//            if(ray.intersection.mat->refractive){
-//                //direction of refraction, using snells law
-//                double cos_idx = ray_norm.dot(I_dir);
-//                double idx = ray.intersection.mat->index_of_refraction;
-//                Vector3D dir = idx * I_dir - (-cos_idx + idx*cos_idx) * ray_norm;
-//
-//                //create new ray
-//                Ray3D new_ray;
-//                new_ray.dir = dir;
-//                new_ray.dir.normalize();
-//                new_ray.origin = ray.intersection.point + 0.01 * new_ray.dir;
-//
-//                //shade ray
-//                Color refrCol = shadeRay(new_ray, scene, light_list, k_bounce+1);
-//                col = col + refrCol;
-//            }
             //reflection
             Ray3D reflection;
             reflection.dir = I - (2 * N.dot(I) * N);
             reflection.dir.normalize();
             // Avoid intersecting with original object
             reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
-            Color reflect_col = shadeRay(reflection, scene, light_list, reflect_times + 1);
+            Color reflect_col = shadeRay(reflection, scene, light_list, cube, reflect_times + 1);
             // Add new color with a small scalar multiple
             col = col + 0.2 * reflect_col;
             
         }
         col.clamp();
+    }
+    else{
+        col = cube.get_color(ray.dir);
     }
 	return col; 
 }
@@ -116,56 +101,150 @@ void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Imag
 
 	Matrix4x4 viewToWorld;
 	double factor = (double(image.height)/2)/tan(camera.fov*M_PI/360.0);
-
+    
 	viewToWorld = camera.initInvViewMatrix();
-    int N= 20;
-    int M= 20;
+    
+    CubeEnv cube;
+    cube.load_cube();
+    
 	// Construct a ray for each pixel.
 	for (int i = 0; i < image.height; i++) {
 		for (int j = 0; j < image.width; j++) {
-//            // Sets up ray origin and direction in view space,
-//            // image plane is at z = -1.
-//            Point3D origin(0, 0, 0);
-//            Point3D imagePlane;
-//
-//            // 16X Supersampling for ANTI-aliasing
-//            Color avg_out(0.0, 0.0, 0.0);
-//            for (float i_patch = i; i_patch < i + 1; i_patch += 0.25f) {
-//                for (float j_patch = j; j_patch < j + 1; j_patch += 0.25f) {
-//                    // 4 rays per pixel, by adding 0.5f to the planar directions
-//                    imagePlane[0] = (-double(image.width)/2 + 0.5 + j_patch)/factor;
-//                    imagePlane[1] = (-double(image.height)/2 + 0.5 + i_patch)/factor;
-//                    imagePlane[2] = -1;
-//
-//                    Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
-//
-//                    Ray3D ray;
-//
-//                    ray.origin = viewToWorld*origin;
-//                    ray.dir = viewToWorld*direction;
-//                    Color col=shadeRay(ray,scene,light_list);
-//                    col = (1.0/16.0) * col;
-//                    avg_out = avg_out + col;
-//                    avg_out.clamp();
-//                }
-//            }
-//
-//
-//            image.setColorAtPixel(i, j, avg_out);
+            // Sets up ray origin and direction in view space,
+            // image plane is at z = -1.
             Point3D origin(0, 0, 0);
             Point3D imagePlane;
-            imagePlane[0] = (-double(image.width)/2 + 0.5 + j)/factor;
-            imagePlane[1] = (-double(image.height)/2 + 0.5 + i)/factor;
-            imagePlane[2] = -1;
-            Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
+
+            // 16X Supersampling for ANTI-aliasing
+            Color avg_out(0.0, 0.0, 0.0);
+            for (float i_patch = i; i_patch < i + 1; i_patch += 0.25f) {
+                for (float j_patch = j; j_patch < j + 1; j_patch += 0.25f) {
+                    // 4 rays per pixel, by adding 0.5f to the planar directions
+                    imagePlane[0] = (-double(image.width)/2 + 0.5 + j_patch)/factor;
+                    imagePlane[1] = (-double(image.height)/2 + 0.5 + i_patch)/factor;
+                    imagePlane[2] = -1;
+
+                    Vector3D direction=Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
+
+                    Ray3D ray;
+
+                    ray.origin = viewToWorld*origin;
+                    ray.dir = viewToWorld*direction;
+                    Color col=shadeRay(ray,scene,light_list,cube);
+                    col = (1.0/16.0) * col;
+                    avg_out = avg_out + col;
+                    avg_out.clamp();
+                }
+            }
+
+
+            image.setColorAtPixel(i, j, avg_out);
             
-            Ray3D ray;
-            // TODO: Convert ray to world space
-            ray.origin = viewToWorld*origin;
-            ray.dir = viewToWorld*direction;
-            Color col=shadeRay(ray,scene,light_list);
-            image.setColorAtPixel(i, j, col);
 		}
 	}
 }
+
+void Texture::load(const char * filename){
+    bmp_read(filename, &x, &y, &rarray, &garray, &barray);
+}
+
+Color Texture::col(Point3D uv) {
+    int i = int(floor(uv[0] * x));
+    int j = int(floor(uv[1] * y));
+    //to get color in [0.0,1.0]
+    Color col(rarray[i *x + j]/255.0,garray[i *x + j]/255.0,barray[i* x + j]/255.0);
+    return col;
+}
+
+Color CubeEnv::get_color(Vector3D direction) {
+    
+    // Used the wikipedia article for cube mapping as a guide
+    // As well as the textbook
+    // Use the convention from the wikipedia article since in the book, +z is the up-direction
+    // In the cube mapping code I assume that positive y is the up-direction, as given in main.cpp
+    Texture * txt;
+    double u;
+    double v;
+    double x = direction[0];
+    double y = direction[1];
+    double z = direction[2];
+    
+    double abs_x = fabs(x);
+    double abs_y = fabs(y);
+    double abs_z = fabs(z);
+    
+    double max = fmax(fmax(abs_x,abs_y),fmax(abs_y,abs_z));
+    
+    if (max==abs_x)
+    {
+        if (x > 0)
+        {
+            u = (-z + x) / (2 * x);
+            v = (-y + x) / (2 * x);
+            txt = posx;
+        }
+        else {
+            u = (-z + x) / (2 * x);
+            v = (y + x) / (2 * x);
+            txt = negx;
+        }
+    }
+    else if (max==abs_y)
+    {
+        if (y > 0)
+        {
+            u = (x + y) / (2 * y);
+            v = (z + y) / (2 * y);
+            txt = posy;
+        }
+        else {
+            u = (-x + y) / (2 * y);
+            v = (z + y) / (2 * y);
+            txt = negy;
+        }
+    }
+    else if (max==abs_z) {
+        if (z > 0)
+        {
+            u = (x + z) / (2 * z);
+            v = (-y + z) / (2 * z);
+            txt = posz;
+        }
+        else {
+            u = (x + z) / (2 * z);
+            v = (y + z) / (2 * z);
+            txt = negz;
+        }
+        
+    }
+    
+    // We do this flipping because
+    // The .bmp file coordinates
+    // are flipped and stored as Y,X
+    
+    //otherwise we would do Point3D(u,v,0)
+    Point3D p(1-v, 1-u, 0);
+    return txt->col(p);
+}
+
+void CubeEnv::load_cube() {
+    // we store the cube map
+    // as six square .bmp images
+    posx = new Texture();
+    posx->load("posx.bmp"); // pos_x
+    negx = new Texture();
+    negx->load("negx.bmp"); // neg_x
+    posy = new Texture();
+    posy->load("posy.bmp"); // pos_y
+    negy = new Texture();
+    negy->load("negy.bmp"); // neg_y
+    posz = new Texture();
+    posz->load("posz.bmp"); // pos_z
+    negz = new Texture();
+    negz->load("negz.bmp"); // neg_z
+}
+
+
+
+
 

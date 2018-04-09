@@ -180,7 +180,6 @@ bool UnitSphere::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
             ray.intersection.normal.normalize();
             ray.intersection.none = false;
             
-//            Vector3D R = ray.dir - (2 * ray.intersection.normal.dot(ray.dir) * ray.intersection.normal);
             Vector3D R = 2 * ray.intersection.normal.dot(ray.dir) * ray.intersection.normal - ray.dir;
             R.normalize();
             
@@ -195,14 +194,6 @@ bool UnitSphere::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
             double x = sin(theta) * cos(phi);
             double y = sin(theta) * sin(phi);
             double z = cos(theta);
-            
-//            double fi_1 = (rand() % 100)*0.01;
-//            double fi_2 = (rand() % 100)*0.01;
-//
-//            double a = 0.8;
-//
-//            double x = -a/2 + fi_1 * a;
-//            double y = -a/2 + fi_2 * a;
             
             ray.dir = x * u + y * v + z * R;
             ray.dir.normalize();
