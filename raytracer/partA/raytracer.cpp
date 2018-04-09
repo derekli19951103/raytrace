@@ -70,8 +70,6 @@ void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Imag
 	double factor = (double(image.height)/2)/tan(camera.fov*M_PI/360.0);
 
 	viewToWorld = camera.initInvViewMatrix();
-    int N= 20;
-    int M= 20;
 	// Construct a ray for each pixel.
 	for (int i = 0; i < image.height; i++) {
 		for (int j = 0; j < image.width; j++) {

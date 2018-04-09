@@ -46,23 +46,51 @@ class Raytracer {
 public:
 	// Renders 3D scene to an image given camera and lights setup.
 	void render(Camera& camera, Scene& scene, LightList& light_list, Image& image);
-		
+    void render_anti(Camera& camera, Scene& scene, LightList& light_list, Image& image);
+    void render_cube(Camera& camera, Scene& scene, LightList& light_list, Image& image);
+    void render_softshadow(Camera& camera, Scene& scene, LightList& light_list, Image& image);
+    void render_reflection(Camera& camera, Scene& scene, LightList& light_list, Image& image);
+    void render_hardshadow(Camera& camera, Scene& scene, LightList& light_list, Image& image);
+    void render_glossy(Camera& camera, Scene& scene, LightList& light_list, Image& image);
 private:
 
 	// Return the color of the ray after intersection and shading, call 
 	// this function recursively for reflection and refraction.  
 	Color shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times);
+    
+    Color shadeRay_cube(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times);
+    
+    Color shadeRay_reflection(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
+    
+    Color shadeRay_softshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
+    
+    Color shadeRay_hardshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
+    
+    Color shadeRay_anti(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
+
 
 	// Traversal code for the scene, the ray is transformed into 
 	// the object space of each node where intersection is performed.
 	void traverseScene(Scene& scene, Ray3D& ray);
-
-	// After intersection, calculate the color of the ray by shading it
-	// with all light sources in the scene.
-	void computeShading(Ray3D& ray, LightList& light_list, Scene& scene);
-
-	// Precompute the modelToWorld and worldToModel transformations for each
+    
+    // Precompute the modelToWorld and worldToModel transformations for each
     // object in the scene.
-	void computeTransforms(Scene& scene);
+    void computeTransforms(Scene& scene);
+
+	
+	void computeShading_hardshadow(Ray3D& ray, LightList& light_list, Scene& scene);
+    
+    void computeShading_softshadow(Ray3D& ray, LightList& light_list, Scene& scene);
+    
+    void computeShading_noshadow(Ray3D& ray, LightList& light_list, Scene& scene);
+    
 
 };
+
+int reflection(int width, int height);
+int anti(int width, int height);
+int softshadow(int width, int height);
+int hardshadow(int width, int height);
+int full(int width, int height);
+int environment(int width, int height);
+int glossy(int width, int height);

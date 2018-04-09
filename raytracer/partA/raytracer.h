@@ -34,5 +34,5 @@ private:
 	// Precompute the modelToWorld and worldToModel transformations for each
     // object in the scene.
 	void computeTransforms(Scene& scene);
-
+    
 };
