@@ -376,7 +376,6 @@ void Raytracer::render_anti(Camera& camera, Scene& scene, LightList& light_list,
             Color avg_out(0.0, 0.0, 0.0);
             for (float i_patch = i; i_patch < i + 1; i_patch += 0.25f) {
                 for (float j_patch = j; j_patch < j + 1; j_patch += 0.25f) {
-                    // 4 rays per pixel, by adding 0.5f to the planar directions
                     imagePlane[0] = (-double(image.width)/2 + 0.5 + j_patch)/factor;
                     imagePlane[1] = (-double(image.height)/2 + 0.5 + i_patch)/factor;
                     imagePlane[2] = -1;
