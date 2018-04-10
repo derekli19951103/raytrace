@@ -188,6 +188,7 @@ bool UnitSphere_glossy::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
             Vector3D v = R.cross(u);
             v.normalize();
             
+            // Giving a new random direction to the ray
             double roughness = 1.1;
             double theta = 2 * M_PI * ((rand() % 100) * 0.008 * roughness);
             double phi = 2 * M_PI * ((rand() % 100) * 0.008 * roughness);

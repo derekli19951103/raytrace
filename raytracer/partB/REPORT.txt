@@ -1,12 +1,108 @@
+=======================================================
+
+					  CSC418
+					Assignment 3
+
+			 Yufeng Li		 Yining Lin
+			 liyufen1		 linyi18
+
+
+
+			 	   April 9th, 2018
+
+=======================================================
+
+Overall Submission
+We completed the mandatory requirements and implemented 
+five features for part B: Anti-aliasing, Depth of field,
+Extended light sources, Environment mapping and Glossy
+reflection.  
+
+Instruction of running code:
+
+
+=======================================================
+
+Code, and the file structure of the submission
+raytracer.cpp:
+contain anti-aliasing, depth of field, 
+
+main.cpp:
+
+scene_object.cpp: 
+Glossy sphere model, 
+
+...
+
+=======================================================
+
 Part A
+Done by Derek
+a)
+
+b)
+
+c)
+
+d)
 
 
+1. scene signature
+
+2. a rendered scene with only the diffuse and ambient 
+	components of the Phong model
+ 
+3. a rendered scene with all three terms of the Phong 
+	model
+
+=======================================================
 
 Part B
+Yufeng:
+- Second reflection
 
+- Hard Shadow
 
-
-
-Environment Texture: 
-
+- Environment Texture: 
 Image source: http://www.humus.name/index.php?page=Textures&start=88
+
+- Soft Shadow
+
+
+
+-------------------------
+
+Yining:
+- Anti-aliasing (16X supersampling) 
+	By casting 16 rays to each pixel, each ray is shifted
+	by 0.25 pixel, and render the pixel by the average 
+	of the rays.
+
+	Result images: antialiasing*.bmp 
+
+- Depth of field
+	By casting multiple rays to every pixel, with randomize
+	eye position, adjustable focal distance and aperture. 
+	In part B, we set the focal distance close to the jade
+	plane, everything else is a bit out of focus, depends 
+	on the distance.
+
+	Result images: DOF*.bmp
+
+	Reference: https://steveharveynz.wordpress.com/2012/12/21/ray-tracer-part-5-depth-of-field/
+
+- Glossy reflection
+	We change the ray by giving it a new random direction 
+	within a range in sphere model, so that the ray of reflection
+	will be in different direction for each pixel. The roughness
+	is depends on the value "roughness". 
+	The pictures we showed in folder is relatively "rough" since
+	there is only one ray being used for the final result. The 
+	glossy effect will be better if using more ray. 
+
+	Result images: glossy*.bmp
+
+	Reference: http://www.raytracegroundup.com/downloads/Chapter25.pdf
+
+
+
