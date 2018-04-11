@@ -19,20 +19,37 @@ Extended light sources, Environment mapping and Glossy
 reflection.  
 
 Instruction of running code:
+To generate width*height bmp files
+Using:
+./raytracer width height options
 
-
+options:
+no options(which means blank space): full effect
+0: secondary reflection
+1: hardshadow
+2: environment mapping
+3: anti-aliasing
+4: softshadow
+5: glossy reflection
+6: depth of field
 =======================================================
 
 Code, and the file structure of the submission
 raytracer.cpp:
-contain anti-aliasing, depth of field, 
+contain anti-aliasing, depth of field, reflection, hardshadow,
+softshadow, ray-casting, environment mapping
+
+raytracer.h:
+Texture, CubeEnv struct
 
 main.cpp:
+softshadow
 
 scene_object.cpp: 
-Glossy sphere model, 
+Glossy sphere model, sphere, cube, square
 
-...
+light_source.cpp:
+phong illumination
 
 =======================================================
 
