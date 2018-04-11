@@ -185,7 +185,7 @@ Color Raytracer::shadeRay_cube(Ray3D& ray, Scene& scene, LightList& light_list, 
 	// Don't bother shading if the ray didn't hit 
 	// anything.
 	if (!ray.intersection.none) {
-		computeShading_softshadow(ray, light_list, scene);
+		computeShading_hardshadow(ray, light_list, scene);
 		col = ray.col;  
 	
 	// You'll want to call shadeRay recursively (with a different ray, 

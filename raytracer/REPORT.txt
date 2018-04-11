@@ -146,8 +146,8 @@ to generate Depth of field(i.e. DOF) images.
 	Reference: https://steveharveynz.wordpress.com/2012/12/21/ray-tracer-part-5-depth-of-field/
 
 - Glossy reflection
-This was done in raytacer.cpp using
-shadeRay_anti() and render_glossy(). Using main.cpp glossy()
+This was done in scene_object.cpp using
+UnitSphere_glossy::intersect(). Using main.cpp glossy() to add a glossy sphere
 to generate glossy reflection images.
 	We change the ray by giving it a new random direction 
 	within a range in sphere model, so that the ray of reflection
@@ -160,6 +160,12 @@ to generate glossy reflection images.
 	Result images: glossy*.bmp
 
 	Reference: http://www.raytracegroundup.com/downloads/Chapter25.pdf
+
+The final effect combining all above effects is displayed in full*.bmp.
+Yufeng Li also add an extra cube in the scene and the code for that is
+in scene_object.cpp UnitCube::intersect() basically creating six square
+planes and use intersect to determine which plane's t value and normal of
+the intersection should be.
 
 
 
