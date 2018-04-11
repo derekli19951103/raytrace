@@ -53,6 +53,7 @@ Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list) {
 	// anything.
 	if (!ray.intersection.none) {
 		computeShading(ray, light_list);
+        //to get sig images
 //        ray.col=ray.intersection.mat->diffuse;
 		col = ray.col;
 	}

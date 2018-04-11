@@ -13,15 +13,13 @@
 #include "light_source.h"
 
 struct Texture {
-    // define the size of the .bmp file
-    
+    //setup for bmp_read()
     unsigned long int x;
     long int y;
     unsigned char* rarray;
     unsigned char* garray;
     unsigned char* barray;
     
-    // array of dimension (x,y) giving the heightmap value at that pixel
     void load(const char * filename);
     //to access certain point color
     Color col(Point3D uv);
@@ -43,7 +41,7 @@ struct CubeEnv {
 class Raytracer {
 public:
 	// Different renders for rendering 3D scene to an image given camera and lights setup.
-	void render(Camera& camera, Scene& scene, LightList& light_list, Image& image);
+	void render(Camera& camera, Scene& scene, LightList& light_list, Image& image); //full effect
     void render_anti(Camera& camera, Scene& scene, LightList& light_list, Image& image);
     void render_cube(Camera& camera, Scene& scene, LightList& light_list, Image& image);
     void render_softshadow(Camera& camera, Scene& scene, LightList& light_list, Image& image);
@@ -53,19 +51,19 @@ public:
     void render_dof(Camera& camera, Scene& scene, LightList& light_list, Image& image);
 private:
 
-	// this shader is for full FX.
+	// this shader is for full effect.
 	Color shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times);
     
     //this shader has cube environment
     Color shadeRay_cube(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times);
     
-    //this shader has no hardshadow
+    //this shader has no hardshadow but has reflection
     Color shadeRay_reflection(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
     
     //this shader is for softshadow
     Color shadeRay_softshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
     
-    //this shader has no reflection
+    //this shader has no reflection but no shadow
     Color shadeRay_hardshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times);
     
     //this shader has reflection and hardshadow

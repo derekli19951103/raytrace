@@ -1,0 +1,162 @@
+=======================================================
+
+					  CSC418
+					Assignment 3
+
+			 Yufeng Li		 Yining Lin
+			 liyufen1		 linyi18
+
+
+
+			 	   April 9th, 2018
+
+=======================================================
+
+Overall Submission
+We completed the mandatory requirements and implemented 
+five features for part B: Anti-aliasing, Depth of field,
+Extended light sources, Environment mapping and Glossy
+reflection.  
+
+Instruction of running code:
+
+
+=======================================================
+
+Code, and the file structure of the submission
+raytracer.cpp:
+contain anti-aliasing, depth of field, 
+
+main.cpp:
+
+scene_object.cpp: 
+Glossy sphere model, 
+
+...
+
+=======================================================
+
+Part A
+
+Done by Yufeng Li
+For partA, the code is in partA folder
+a)
+This was done in raytacer.cpp render() function
+I create a ray with its direction and origin and then pass to the
+shader to get its colour. Then set the colour in corresponding 
+coordinates in image plane.
+b)
+This was done in scene_object.cpp UnitSphere::intersect
+As mentioned in class, I compute the substitute equation's quadratic form and compute A,B,C
+to get the solution of the equation.
+c)
+This was done in scene_object.cpp UnitSquare::intersect
+As mentioned in class, I substitute the ray into the plane equation
+and get its intersection.
+d)
+This was done in light_source.cpp
+As same as second assignment, I calculated Incident light, reflection, 
+normal and camera vector to compute phong illumination model.
+
+1. scene signature
+set ray.col=ray.intersection.mat->diffuse; to in Raytracer::shadeRay to
+get sig images
+2. a rendered scene with only the diffuse and ambient 
+	components of the Phong model
+comment out the specular light in light_source.cpp to get diffuse images
+3. a rendered scene with all three terms of the Phong 
+	model
+activate all effects to get phong images
+=======================================================
+
+Part B
+Yufeng Li:
+- Second reflection
+This was done in raytacer.cpp using computeShading_noshadow()
+shadeRay_reflection() and render_reflection(). Using main.cpp reflection()
+to generate reflection images.
+I cast a new ray at the point of intersection which is the reflection of
+incoming ray using computing method same as that of reflection in phong illumination
+model. To avoid same point being calculating shading twice, i shift reflection's
+origin by a very small amount.
+
+Result images: reflection*.bmp 
+
+- Hard Shadow
+This was done in raytacer.cpp using computeShading_hardshadow()
+shadeRay_hardshadow() and render_hardshadow(). Using main.cpp hardshadow()
+to generate hardshadow images.
+To get the hardshadow, I cast a new ray back from intersection to the light source
+origin. If there's intersection between them, then there's object in between them.
+Thus the colour should be dimmer(i.e. I set 0.3 * ray.col).
+
+Result images: hardshadow*.bmp 
+
+
+From here on I use shadeRay_anti() to get the composite effects of secondary reflection
+and hardshadow. Below are the additional effects add on top of Part B's basic requirements.
+
+- Environment Texture: (Cube Mapping)
+Image source: http://www.humus.name/index.php?page=Textures&start=88
+Ideas from: https://en.wikipedia.org/wiki/Cube_mapping (especially to learn how to get the facing of the cube mapping)
+This was done in raytacer.cpp using
+shadeRay_cube() and render_cube(). Using main.cpp environment()
+to generate environment images.
+I built two addition structs: Texture and CubeEnv to store the texture and six images of 
+each cube surface and write getters(to get certain colour), loaders respectively. I use already implemented bmp_read() to read .bmp files. I use CubeEnv::get_color() to determine which face it should be facing and to get that face's texture's colour(using Texture::col()) to be the colour when rays don't intersecting any object.
+
+Result images: environment*.bmp 
+
+- Soft Shadow
+This was done in raytacer.cpp using computeShading_softshadow()
+shadeRay_softshadow() and render_softshadow(). Using main.cpp softshadow()
+to generate softshadow images.
+Since softshadow is generated when area light is at presence, so I add more light source in softshadow and get the each shadow produced by each light source and average it in computeShading_softshadow().
+
+Result images: softshadow*.bmp 
+
+-------------------------
+
+Yining:
+- Anti-aliasing (16X supersampling) 
+This was done in raytacer.cpp using
+shadeRay_anti() and render_anti(). Using main.cpp anti()
+to generate Anti-aliasing images.
+	By casting 16 rays to each pixel, each ray is shifted
+	by 0.25 pixel, and render the pixel by the average 
+	of the rays.
+
+	Result images: antialiasing*.bmp 
+
+- Depth of field
+This was done in raytacer.cpp using
+shadeRay_anti() and render_dof(). Using main.cpp dof()
+to generate Depth of field(i.e. DOF) images.
+	By casting multiple rays to every pixel, with randomize
+	eye position, adjustable focal distance and aperture. 
+	In part B, we set the focal distance close to the jade
+	plane, everything else is a bit out of focus, depends 
+	on the distance.
+
+	Result images: DOF*.bmp
+
+	Reference: https://steveharveynz.wordpress.com/2012/12/21/ray-tracer-part-5-depth-of-field/
+
+- Glossy reflection
+This was done in raytacer.cpp using
+shadeRay_anti() and render_glossy(). Using main.cpp glossy()
+to generate glossy reflection images.
+	We change the ray by giving it a new random direction 
+	within a range in sphere model, so that the ray of reflection
+	will be in different direction for each pixel. The roughness
+	is depends on the value "roughness". 
+	The pictures we showed in folder is relatively "rough" since
+	there is only one ray being used for the final result. The 
+	glossy effect will be better if using more ray. 
+
+	Result images: glossy*.bmp
+
+	Reference: http://www.raytracegroundup.com/downloads/Chapter25.pdf
+
+
+

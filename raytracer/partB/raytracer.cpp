@@ -92,41 +92,23 @@ void Raytracer::computeShading_softshadow(Ray3D& ray, LightList& light_list, Sce
     ray.col = (1.0/light_list.size()) * c;
 }
 
-Color Raytracer::shadeRay_cube(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times = 0) {
-	Color col(0.0, 0.0, 0.0); 
-	traverseScene(scene, ray);
-	// Don't bother shading if the ray didn't hit 
-	// anything.
-	if (!ray.intersection.none) {
-		computeShading_softshadow(ray, light_list, scene);
-		col = ray.col;  
-	
-	// You'll want to call shadeRay recursively (with a different ray, 
-	// of course) here to implement reflection/refraction effects.
-        //secondary reflection
-        if(reflect_times < 2){
-            
-            Vector3D N = ray.intersection.normal;
-            Vector3D I = ray.dir;
-            
-            //reflection
-            Ray3D reflection;
-            reflection.dir = I - (2 * N.dot(I) * N);
-            reflection.dir.normalize();
-            // Avoid intersecting with original object
-            reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
-            Color reflect_col = shadeRay_cube(reflection, scene, light_list, cube, reflect_times + 1);
-            // Add new color with a small scalar multiple
-            col = col + 0.2 * reflect_col;
-            
-        }
-        col.clamp();
+
+
+//shaders
+Color Raytracer::shadeRay_hardshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
+    Color col(0.0, 0.0, 0.0);
+    traverseScene(scene, ray);
+    // Don't bother shading if the ray didn't hit
+    // anything.
+    if (!ray.intersection.none) {
+        computeShading_hardshadow(ray, light_list, scene);
+        col = ray.col;
+        
+        // You'll want to call shadeRay recursively (with a different ray,
+        // of course) here to implement reflection/refraction effects.
         
     }
-    else{
-        col = cube.get_color(ray.dir);
-    }
-	return col; 
+    return col;
 }
 
 Color Raytracer::shadeRay_reflection(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
@@ -151,10 +133,10 @@ Color Raytracer::shadeRay_reflection(Ray3D& ray, Scene& scene, LightList& light_
             Ray3D reflection;
             reflection.dir = I - (2 * N.dot(I) * N);
             reflection.dir.normalize();
-            // Avoid intersecting with original object
+            // Avoid intersecting with original point
             reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
             Color reflect_col = shadeRay_reflection(reflection, scene, light_list, reflect_times + 1);
-            // Add new color with a small scalar multiple
+            // reflection intensity
             col = col + 0.2 * reflect_col;
             
         }
@@ -163,9 +145,7 @@ Color Raytracer::shadeRay_reflection(Ray3D& ray, Scene& scene, LightList& light_
     return col;
 }
 
-
-
-Color Raytracer::shadeRay_hardshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
+Color Raytracer::shadeRay_anti(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
     Color col(0.0, 0.0, 0.0);
     traverseScene(scene, ray);
     // Don't bother shading if the ray didn't hit
@@ -177,8 +157,63 @@ Color Raytracer::shadeRay_hardshadow(Ray3D& ray, Scene& scene, LightList& light_
         // You'll want to call shadeRay recursively (with a different ray,
         // of course) here to implement reflection/refraction effects.
         
+        //secondary reflection
+        if(reflect_times < 2){
+            
+            Vector3D N = ray.intersection.normal;
+            Vector3D I = ray.dir;
+            
+            //reflection
+            Ray3D reflection;
+            reflection.dir = I - (2 * N.dot(I) * N);
+            reflection.dir.normalize();
+            // Avoid intersecting with original point
+            reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
+            Color reflect_col = shadeRay_reflection(reflection, scene, light_list, reflect_times + 1);
+            // reflection intensity
+            col = col + 0.2 * reflect_col;
+            
+        }
+        col.clamp();
     }
     return col;
+}
+
+Color Raytracer::shadeRay_cube(Ray3D& ray, Scene& scene, LightList& light_list, CubeEnv& cube, int reflect_times = 0) {
+	Color col(0.0, 0.0, 0.0); 
+	traverseScene(scene, ray);
+	// Don't bother shading if the ray didn't hit 
+	// anything.
+	if (!ray.intersection.none) {
+		computeShading_softshadow(ray, light_list, scene);
+		col = ray.col;  
+	
+	// You'll want to call shadeRay recursively (with a different ray, 
+	// of course) here to implement reflection/refraction effects.
+        //secondary reflection
+        if(reflect_times < 2){
+            
+            Vector3D N = ray.intersection.normal;
+            Vector3D I = ray.dir;
+            
+            //reflection
+            Ray3D reflection;
+            reflection.dir = I - (2 * N.dot(I) * N);
+            reflection.dir.normalize();
+            // Avoid intersecting with original point
+            reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
+            Color reflect_col = shadeRay_reflection(reflection, scene, light_list, reflect_times + 1);
+            // reflection intensity
+            col = col + 0.2 * reflect_col;
+            
+        }
+        col.clamp();
+        
+    }
+    else{
+        col = cube.get_color(ray.dir);
+    }
+	return col; 
 }
 
 Color Raytracer::shadeRay_softshadow(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
@@ -203,10 +238,10 @@ Color Raytracer::shadeRay_softshadow(Ray3D& ray, Scene& scene, LightList& light_
             Ray3D reflection;
             reflection.dir = I - (2 * N.dot(I) * N);
             reflection.dir.normalize();
-            // Avoid intersecting with original object
+            // Avoid intersecting with original point
             reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
-            Color reflect_col = shadeRay_softshadow(reflection, scene, light_list, reflect_times + 1);
-            // Add new color with a small scalar multiple
+            Color reflect_col = shadeRay_reflection(reflection, scene, light_list, reflect_times + 1);
+            // reflection intensity
             col = col + 0.2 * reflect_col;
             
         }
@@ -238,10 +273,10 @@ Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, CubeE
             Ray3D reflection;
             reflection.dir = I - (2 * N.dot(I) * N);
             reflection.dir.normalize();
-            // Avoid intersecting with original object
+            // Avoid intersecting with original point
             reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
-            Color reflect_col = shadeRay(reflection, scene, light_list, cube, reflect_times + 1);
-            // Add new color with a small scalar multiple
+            Color reflect_col = shadeRay_reflection(reflection, scene, light_list, reflect_times + 1);
+            // reflection intensity
             col = col + 0.2 * reflect_col;
             
         }
@@ -253,108 +288,9 @@ Color Raytracer::shadeRay(Ray3D& ray, Scene& scene, LightList& light_list, CubeE
     return col;
 }
 
-Color Raytracer::shadeRay_anti(Ray3D& ray, Scene& scene, LightList& light_list, int reflect_times = 0) {
-    Color col(0.0, 0.0, 0.0);
-    traverseScene(scene, ray);
-    // Don't bother shading if the ray didn't hit
-    // anything.
-    if (!ray.intersection.none) {
-        computeShading_softshadow(ray, light_list, scene);
-        col = ray.col;
-        
-        // You'll want to call shadeRay recursively (with a different ray,
-        // of course) here to implement reflection/refraction effects.
-        
-        //secondary reflection
-        if(reflect_times < 2){
-            
-            Vector3D N = ray.intersection.normal;
-            Vector3D I = ray.dir;
-            
-            //reflection
-            Ray3D reflection;
-            reflection.dir = I - (2 * N.dot(I) * N);
-            reflection.dir.normalize();
-            // Avoid intersecting with original object
-            reflection.origin = ray.intersection.point + 0.001 * reflection.dir;
-            Color reflect_col = shadeRay_anti(reflection, scene, light_list, reflect_times + 1);
-            // Add new color with a small scalar multiple
-            col = col + 0.2 * reflect_col;
-            
-        }
-        col.clamp();
-    }
-    return col;
-}
 
-void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Image& image) {
-	computeTransforms(scene);
 
-	Matrix4x4 viewToWorld;
-	double factor = (double(image.height)/2)/tan(camera.fov*M_PI/360.0);
-    
-	viewToWorld = camera.initInvViewMatrix();
-    
-    CubeEnv cube;
-    cube.load_cube();
-    
-    float f_length = 8.0;
-    float f_size = 0.05;
-    int num_of_ray = 16;
-    float r;
-    
-	// Construct a ray for each pixel.
-	for (int i = 0; i < image.height; i++) {
-		for (int j = 0; j < image.width; j++) {
-            // Sets up ray origin and direction in view space,
-            // image plane is at z = -1.
-            Point3D origin(0, 0, 0);
-            Point3D imagePlane;
-            
-            // Depth of Field
-            imagePlane[0] = (-double(image.width)/2 + 0.5 + j)/factor;
-            imagePlane[1] = (-double(image.height)/2 + 0.5 + i)/factor;
-            imagePlane[2] = -1;
-            Vector3D direction = Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
-            Ray3D ray;
-            ray.origin = viewToWorld*origin;
-            ray.dir = viewToWorld*direction;
-            ray.dir.normalize();
-            
-            float apertureRx = camera.up.normalize() * f_size;
-            float apertureRy = camera.view.normalize() * f_size;
-            
-            // Cast multiple ray and get the avg
-            Color avg_out(0.0, 0.0, 0.0);
-            for(int ind = 0; ind < num_of_ray; ind++){
-                // Get random eye position
-                Point3D the_eye = camera.eye;
-                the_eye[0] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRx;
-                the_eye[1] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRy;
-                
-                // Use position to create new camera
-                Camera the_cam(the_eye, camera.view, camera.up, camera.fov);
-                
-                // The focal point
-                Point3D focus_point = camera.eye + f_length * ray.dir;
-                Vector3D the_dir = focus_point - the_cam.eye;
-                
-                Matrix4x4 the_viewOfWorld = the_cam.initInvViewMatrix();
-                
-                Point3D the_origin = the_viewOfWorld * imagePlane;
-                the_dir.normalize();
-                Ray3D the_ray(the_origin, the_dir);
-                
-                Color col = shadeRay(the_ray, scene, light_list,cube);
-                col = (1.0/num_of_ray) * col;
-                avg_out = avg_out + col;
-            }
-            image.setColorAtPixel(i, j, avg_out);
-            
-		}
-	}
-}
-
+//renders
 void Raytracer::render_anti(Camera& camera, Scene& scene, LightList& light_list, Image& image) {
     computeTransforms(scene);
     
@@ -624,6 +560,74 @@ void Raytracer::render_dof(Camera& camera, Scene& scene, LightList& light_list, 
     }
 }
 
+void Raytracer::render(Camera& camera, Scene& scene, LightList& light_list, Image& image) {
+    computeTransforms(scene);
+    
+    Matrix4x4 viewToWorld;
+    double factor = (double(image.height)/2)/tan(camera.fov*M_PI/360.0);
+    
+    viewToWorld = camera.initInvViewMatrix();
+    
+    CubeEnv cube;
+    cube.load_cube();
+    
+    float f_length = 8.0;
+    float f_size = 0.05;
+    int num_of_ray = 16;
+    float r;
+    
+    // Construct a ray for each pixel.
+    for (int i = 0; i < image.height; i++) {
+        for (int j = 0; j < image.width; j++) {
+            // Sets up ray origin and direction in view space,
+            // image plane is at z = -1.
+            Point3D origin(0, 0, 0);
+            Point3D imagePlane;
+            
+            // Depth of Field
+            imagePlane[0] = (-double(image.width)/2 + 0.5 + j)/factor;
+            imagePlane[1] = (-double(image.height)/2 + 0.5 + i)/factor;
+            imagePlane[2] = -1;
+            Vector3D direction = Vector3D(imagePlane[0],imagePlane[1],imagePlane[2]);
+            Ray3D ray;
+            ray.origin = viewToWorld*origin;
+            ray.dir = viewToWorld*direction;
+            ray.dir.normalize();
+            
+            float apertureRx = camera.up.normalize() * f_size;
+            float apertureRy = camera.view.normalize() * f_size;
+            
+            // Cast multiple ray and get the avg
+            Color avg_out(0.0, 0.0, 0.0);
+            for(int ind = 0; ind < num_of_ray; ind++){
+                // Get random eye position
+                Point3D the_eye = camera.eye;
+                the_eye[0] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRx;
+                the_eye[1] += ((static_cast<float>(rand() % RAND_MAX) / RAND_MAX) * 2.0f - 1.0f) * apertureRy;
+                
+                // Use position to create new camera
+                Camera the_cam(the_eye, camera.view, camera.up, camera.fov);
+                
+                // The focal point
+                Point3D focus_point = camera.eye + f_length * ray.dir;
+                Vector3D the_dir = focus_point - the_cam.eye;
+                
+                Matrix4x4 the_viewOfWorld = the_cam.initInvViewMatrix();
+                
+                Point3D the_origin = the_viewOfWorld * imagePlane;
+                the_dir.normalize();
+                Ray3D the_ray(the_origin, the_dir);
+                
+                Color col = shadeRay(the_ray, scene, light_list,cube);
+                col = (1.0/num_of_ray) * col;
+                avg_out = avg_out + col;
+            }
+            image.setColorAtPixel(i, j, avg_out);
+            
+        }
+    }
+}
+
 
 void Texture::load(const char * filename){
     bmp_read(filename, &x, &y, &rarray, &garray, &barray);
@@ -632,17 +636,15 @@ void Texture::load(const char * filename){
 Color Texture::col(Point3D uv) {
     int i = int(floor(uv[0] * x));
     int j = int(floor(uv[1] * y));
-    //to get color in [0.0,1.0]
+    //to get color in range [0.0,1.0]
     Color col(rarray[i *x + j]/255.0,garray[i *x + j]/255.0,barray[i* x + j]/255.0);
     return col;
 }
 
 Color CubeEnv::get_color(Vector3D direction) {
     
-    // Used the wikipedia article for cube mapping as a guide
-    // As well as the textbook
-    // Use the convention from the wikipedia article since in the book, +z is the up-direction
-    // In the cube mapping code I assume that positive y is the up-direction, as given in main.cpp
+    //use wiki page for cueb mapping en.wikipedia.org/wiki/Cube_mapping
+    //convert_xyz_to_cube_uv() funtion as a spark
     Texture * txt;
     double u;
     double v;
@@ -699,18 +701,14 @@ Color CubeEnv::get_color(Vector3D direction) {
         
     }
     
-    // We do this flipping because
-    // The .bmp file coordinates
-    // are flipped and stored as Y,X
     
-    //otherwise we would do Point3D(u,v,0)
+    //bmp_read gets (y,x) not (x,y)
     Point3D p(1-v, 1-u, 0);
     return txt->col(p);
 }
 
 void CubeEnv::load_cube() {
-    // we store the cube map
-    // as six square .bmp images
+    //load six bmp
     posx = new Texture();
     posx->load("posx.bmp"); // pos_x
     negx = new Texture();
