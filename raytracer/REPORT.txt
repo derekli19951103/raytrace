@@ -103,7 +103,9 @@ This was done in raytacer.cpp using
 shadeRay_cube() and render_cube(). Using main.cpp environment()
 to generate environment images.
 I built two addition structs: Texture and CubeEnv to store the texture and six images of 
-each cube surface and write getters(to get certain colour), loaders respectively. I use already implemented bmp_read() to read .bmp files. I use CubeEnv::get_color() to determine which face it should be facing and to get that face's texture's colour(using Texture::col()) to be the colour when rays don't intersecting any object.
+each cube surface and write getters(to get certain colour), loaders respectively. 
+I use already implemented bmp_read() to read .bmp files. 
+I use CubeEnv::get_color() to determine which face it should be facing and to get that face's texture's colour(using Texture::col()) to be the colour when rays don't intersecting any object.
 
 Result images: environment*.bmp 
 
@@ -111,7 +113,8 @@ Result images: environment*.bmp
 This was done in raytacer.cpp using computeShading_softshadow()
 shadeRay_softshadow() and render_softshadow(). Using main.cpp softshadow()
 to generate softshadow images.
-Since softshadow is generated when area light is at presence, so I add more light source in softshadow and get the each shadow produced by each light source and average it in computeShading_softshadow().
+Since softshadow is generated when area light is at presence, so I add more light source in 
+softshadow and get the each shadow produced by each light source and average it in computeShading_softshadow().
 
 Result images: softshadow*.bmp 
 
