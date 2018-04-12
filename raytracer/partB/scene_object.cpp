@@ -192,11 +192,11 @@ bool UnitSphere_glossy::intersect(Ray3D& ray, const Matrix4x4& worldToModel,
             double roughness = 1.1;
             double theta = 2 * M_PI * ((rand() % 100) * 0.008 * roughness);
             double phi = 2 * M_PI * ((rand() % 100) * 0.008 * roughness);
-            double x = sin(theta) * cos(phi);
-            double y = sin(theta) * sin(phi);
-            double z = cos(theta);
+            double sx = sin(theta) * cos(phi);
+            double sy = sin(theta) * sin(phi);
+            double sz = cos(theta);
             
-            ray.dir = x * u + y * v + z * R;
+            ray.dir = sx * u + sy * v + sz * R;
             ray.dir.normalize();
             
             return true;
