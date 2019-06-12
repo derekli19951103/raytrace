@@ -6,15 +6,15 @@ cd partB
 make
 ./raytracer [width] [height] [options]
 ```
-options are as follows:
-[(leave blank): full effect](#final)
-0: secondary reflection
-[1: hardshadow](#hardshadow)
-[2: environment mapping](#cubemap)
-[3: anti-aliasing](#anti-aliasing)
-[4: softshadow](#softshadow)
-[5: glossy reflection](#glossy-reflection)
-[6: depth of field](#depth-of-field)
+options are as follows:  
+[(leave blank): full effect](#final)  
+0: secondary reflection  
+[1: hardshadow](#hardshadow)  
+[2: environment mapping](#cubemap)  
+[3: anti-aliasing](#anti-aliasing)  
+[4: softshadow](#softshadow)  
+[5: glossy reflection](#glossy-reflection)  
+[6: depth of field](#depth-of-field)  
 ## Result
 ### Final
 ![full1](raytracer/partB/full1.bmp)
